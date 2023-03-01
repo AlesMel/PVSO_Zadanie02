@@ -54,12 +54,14 @@ ret, mtx, dist, rvecs, tvecs = cv.calibrateCamera(objpoints, imgpoints, gray.sha
 img = cv.imread('chessboard0.jpg')
 h,  w = img.shape[:2]
 newcameramtx, roi = cv.getOptimalNewCameraMatrix(mtx, dist, (w,h), 1, (w,h))
+
 # undistort
 dst = cv.undistort(img, mtx, dist, None, newcameramtx)
 # crop the image
 x, y, w, h = roi
 dst = dst[y:y+h, x:x+w]
 cv.imwrite('calibresult.png', dst)
+
 # undistort
 mapx, mapy = cv.initUndistortRectifyMap(mtx, dist, None, newcameramtx, (w,h), 5)
 dst = cv.remap(img, mapx, mapy, cv.INTER_LINEAR)
@@ -75,7 +77,17 @@ for i in range(len(objpoints)):
     mean_error += error
 print( "total error: {}".format(mean_error/len(objpoints)) )
 
-cv.destroyAllWindows()
+
+while True:
+    img = process_image(WIDTH, HEIGHT)
+    dst = cv.undistort(img, mtx, dist, None, newcameramtx)
+    # crop the image
+    x, y, w, h = roi
+    dst = dst[y:y + h, x:x + w]
+    cv.imshow('calibresult.png', dst)
+    pressed = cv.waitKey(1)
+    if pressed == ord('q'):
+        exit(0)
 
 # After the loop release the cap object
 cam.release()
